@@ -8,16 +8,18 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 @contextmanager
-def db_session():
+def db_session(db_user, db_pass, db_host, db_port, db_name):
     """ 
         Creates a context with an open SQLAlchemy session.
     """
+    print(os.getenv('MYSQL_USER'))
+
     SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://%s:%s@%s:%s/%s" % (
-        os.getenv('MYSQL_USER'),
-        os.getenv('MYSQL_PASS'),
-        os.getenv('MYSQL_HOST'),
-        int(os.getenv('MYSQL_PORT')),
-        os.getenv('MYSQL_DB'),
+        db_user,
+        db_pass,
+        db_host,
+        int(db_port),
+        db_name,
     )
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL,
@@ -43,8 +45,12 @@ class SQLAuthenticator(Authenticator):
 
     @gen.coroutine
     def authenticate(self, handler, data):
-
-        with db_session() as db:
+        db_user=os.getenv('MYSQL_USER')
+        db_pass=os.getenv('MYSQL_PASS')
+        db_host=os.getenv('MYSQL_HOST')
+        db_port=os.getenv('MYSQL_PORT')
+        db_name=os.getenv('MYSQL_DB')
+        with db_session(db_user, db_pass, db_host, db_port, db_name) as db:
             query = db[0].execute('SELECT * FROM users where username=?', data['username'])
             if query and self._verify_password_hash(query.password,
                                                         data['password']):
