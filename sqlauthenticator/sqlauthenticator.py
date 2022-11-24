@@ -16,7 +16,7 @@ def db_session():
         os.getenv('MYSQL_USER'),
         os.getenv('MYSQL_PASS'),
         os.getenv('MYSQL_HOST'),
-        os.getenv('MYSQL_PORT'),
+        int(os.getenv('MYSQL_PORT')),
         os.getenv('MYSQL_DB'),
     )
     engine = create_engine(
