@@ -1,6 +1,7 @@
 from jupyterhub.auth import Authenticator
 from tornado import gen
-from passlib.hash import pbkdf2_sha256
+# from passlib.hash import pbkdf2_sha256
+import hashlib
 import pymysql.cursors
 import os
 
@@ -8,7 +9,9 @@ import os
 class SQLAuthenticator(Authenticator):
     def _verify_password_hash(self, hash_, password):
         try:
-            return pbkdf2_sha256.verify(password, hash_)
+            input_password_hash = hashlib.md5(password.encode())
+            if input_password_hash==hash_:
+                return True
         except ValueError:
             return False
 

@@ -2,8 +2,19 @@
 > Authenticate Jupyterhub with a MySQL user database
 
 ## Installation
+Install from git:
+```
+git clone https://github.com/javad-rzvn/jupyterhub-sqlauthenticator.git
+sudo python3 setup.py install
+```
+OR
+```
+pip install .
+```
+
 
 Run this command to install:
+https://pypi.org/project/sqlauthenticator/
 
 ```
 pip install sqlauthenticator
