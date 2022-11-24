@@ -1,10 +1,36 @@
 from jupyterhub.auth import Authenticator
 from tornado import gen
-# from passlib.hash import pbkdf2_sha256
 import hashlib
-import pymysql.cursors
 import os
+from contextlib import contextmanager
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
+
+@contextmanager
+def db_session():
+    """ 
+        Creates a context with an open SQLAlchemy session.
+    """
+    SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://%s:%s@%s:%s/%s" % (
+        os.getenv('MYSQL_USER'),
+        os.getenv('MYSQL_PASS'),
+        os.getenv('MYSQL_HOST'),
+        os.getenv('MYSQL_PORT'),
+        os.getenv('MYSQL_DB'),
+    )
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=3600,
+        pool_timeout=3600,
+        pool_size=5
+    )
+    connection = engine.connect()
+    db_session = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
+    yield engine, db_session
+    db_session.close()
+    connection.close()
 
 class SQLAuthenticator(Authenticator):
     def _verify_password_hash(self, hash_, password):
@@ -17,25 +43,9 @@ class SQLAuthenticator(Authenticator):
 
     @gen.coroutine
     def authenticate(self, handler, data):
-        conn = pymysql.connect(host=os.getenv('MYSQL_HOST'),
-                               port=int(os.getenv('MYSQL_PORT', 0)),
-                               user=os.getenv('MYSQL_USER'),
-                               password=os.getenv('MYSQL_PASS'),
-                               db=os.getenv('MYSQL_DB'),
-                               charset='utf8mb4',
-                               cursorclass=pymysql.cursors.DictCursor)
 
-        try:
-            with conn.cursor() as cursor:
-                user = conn.escape(data['username'])
-                sql = 'SELECT `password` FROM `users` WHERE `username` = {}'
-                sql_formatted = sql.format(user)
-
-                cursor.execute(sql_formatted)
-                result = cursor.fetchone()
-                if result and self._verify_password_hash(result['password'],
-                                                         data['password']):
-                    return data['username']
-
-        finally:
-            conn.close()
+        with db_session() as db:
+            query = db[0].execute('SELECT * FROM users where username=?', data['username'])
+            if query and self._verify_password_hash(query.password,
+                                                        data['password']):
+                return data['username']
