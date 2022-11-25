@@ -39,7 +39,7 @@ def db_session(db_user, db_pass, db_host, db_port, db_name):
 class SQLAuthenticator(Authenticator):
     def _verify_password_hash(self, hash_, password):
         try:
-            input_password_hash = hashlib.md5(password.encode())
+            input_password_hash = hashlib.md5(password.encode('utf-8')).hexdigest()
             if input_password_hash==hash_:
                 return True
         except ValueError:
@@ -55,6 +55,6 @@ class SQLAuthenticator(Authenticator):
         with db_session(db_user, db_pass, db_host, db_port, db_name) as db:
             raw_query = "SELECT password FROM users WHERE username=%s"
             query = db[0].execute(raw_query, data['username'])
-            # if query and self._verify_password_hash(query.first()[0], data['password']):
-            if query and (query.first()[0]==data['password']):
+            if query and self._verify_password_hash(query.first()[0], data['password']):
+            # if query and (query.first()[0]==data['password']):
                 return data['username']
