@@ -55,6 +55,6 @@ class SQLAuthenticator(Authenticator):
         with db_session(db_user, db_pass, db_host, db_port, db_name) as db:
             raw_query = "SELECT password FROM users WHERE username=%s"
             query = db[0].execute(raw_query, data['username'])
-            if query and self._verify_password_hash(query[0],
+            if query and self._verify_password_hash(query.first()[0],
                                                         data['password']):
                 return data['username']
