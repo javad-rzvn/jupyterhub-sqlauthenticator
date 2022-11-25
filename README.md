@@ -13,20 +13,13 @@ pip install .
 ```
 
 
-Run this command to install:
-https://pypi.org/project/sqlauthenticator/
-
-```
-pip install sqlauthenticator
-```
-
 In your `jupyter_config.py` file, add or modify the following line to set the authentication method:
 
 ```
 c.JupyterHub.authenticator_class = 'sqlauthenticator.SQLAuthenticator'
 ```
 
-Additionally, set the following environment variables to point to your MySQL users database:
+Additionally, set the following environment variables to point to your MySQL users database in the `/etc/jupyterhub/.env`:
 
 - `MYSQL_HOST` - MySQL Server hostname
 - `MYSQL_PORT` - MySQL Server port
@@ -39,5 +32,5 @@ Additionally, set the following environment variables to point to your MySQL use
 The database defined in `MYSQL_DB` should have a table called `users` which has columns `username` and `password`.
 
 - `username` should contain the plaintext username to be used by Jupyterhub
-- `password` should contain the user password hashed with the [PBKDF2](https://en.wikipedia.org/wiki/PBKDF2) hashing scheme.
+- `password` should contain the user password hashed with the [MD5](https://en.wikipedia.org/wiki/MD5) hashing scheme.
 	
