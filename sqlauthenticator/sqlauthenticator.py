@@ -53,7 +53,8 @@ class SQLAuthenticator(Authenticator):
         db_port=os.getenv('MYSQL_PORT')
         db_name=os.getenv('MYSQL_DB')
         with db_session(db_user, db_pass, db_host, db_port, db_name) as db:
-            query = db[0].execute('SELECT * FROM users where username=?', data['username'])
+            raw_query = "SELECT password FROM users WHERE username=%s"
+            query = db[0].execute(raw_query, data['username'])
             if query and self._verify_password_hash(query.password,
                                                         data['password']):
                 return data['username']

@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='sqlauthenticator',
-      version='1.2.3',
+      version='1.2.4',
       description='SQL Authenticator for Jupyterhub',
       author='Benjamin Congdon',
       license='MIT',
