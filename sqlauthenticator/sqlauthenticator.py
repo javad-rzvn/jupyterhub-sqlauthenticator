@@ -5,15 +5,17 @@ import os
 from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from dotenv import load_dotenv
 
+
+dotenv_path = "/etc/jupyterhub/.env"
+load_dotenv(dotenv_path)
 
 @contextmanager
 def db_session(db_user, db_pass, db_host, db_port, db_name):
     """ 
         Creates a context with an open SQLAlchemy session.
     """
-    print(os.getenv('MYSQL_USER'))
-
     SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://%s:%s@%s:%s/%s" % (
         db_user,
         db_pass,
